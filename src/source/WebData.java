@@ -1,6 +1,7 @@
 package source;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.text.*;
 
 import com.robrua.orianna.api.core.RiotAPI;
@@ -23,6 +24,7 @@ public class WebData {
         RiotAPI.setRegion(Region.NA);
         RiotAPI.setAPIKey("bf7ec21b-9468-4e70-9019-e836fc5af85d");
         List<Date> dater = new ArrayList<>();
+        while(true){
         List<?> list = StaticDataAPI.getChampions();
         int listSize = list.size();
         final long now = System.currentTimeMillis();
@@ -72,6 +74,9 @@ public class WebData {
 	          new UINT_PTR(0), 
 	          path, 
 	          new UINT_PTR(SPI.SPIF_UPDATEINIFILE | SPI.SPIF_SENDWININICHANGE));
+	      TimeUnit.HOURS.sleep(4);
+        } catch(InterruptedException ex) {
+     	   Thread.currentThread().interrupt();
         } catch (IOException e) {
             e.printStackTrace();
         } 
@@ -81,4 +86,5 @@ public class WebData {
     }
 	}
 	}
+}
               
