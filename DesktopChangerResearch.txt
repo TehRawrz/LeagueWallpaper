@@ -1,0 +1,25 @@
+//retrieve summoner splash arts. name_skin#
+http://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zilean_0.jpg
+//pull all champion ids
+https://na.api.pvp.net/api/lol/na/v1.2/champion?api_key=bf7ec21b-9468-4e70-9019-e836fc5af85d
+//pull specific champion data by id
+https://global.api.pvp.net/api/lol/static-data/na/v1.2/champion/1?locale=en_US&api_key=bf7ec21b-9468-4e70-9019-e836fc5af85d
+//pull champion data with skin data
+https://na.api.pvp.net/api/lol/static-data/na/v1.2/champion/266?champData=image,skins&api_key=bf7ec21b-9468-4e70-9019-e836fc5af85d
+//need release dates for champs and skins
+//Libraries for riot api
+https://developer.riotgames.com/discussion/riot-games-api/show/iXR9Vl2A
+//for skins pull all and compare to what you have. -dif is what changed
+//Jsoup table selectors
+http://jsoup.org/cookbook/extracting-data/selector-syntax
+//NEW SKINS
+http://leagueoflegends.wikia.com/wiki/League_of_Legends_Wiki/New_skins
+//Free to play json
+https://na.api.pvp.net/api/lol/na/v1.2/champion?freeToPlay=true&api_key=bf7ec21b-9468-4e70-9019-e836fc5af85d
+//parse with gson
+//remove orianna and pull all json directly from riot api and parse byself especially count of champions in newest champ
+//gui. adjustable time between changes. changable which version to run. (newskin, champ rotate, newest champion).
+//run in dock
+//themed skins may use the same splash art so wallpaper won't change that cycle
+	--possibly check if image is the same if it is then skip it.
+//test changer code in windows 8
