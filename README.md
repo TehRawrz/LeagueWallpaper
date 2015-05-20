@@ -1,5 +1,5 @@
 # LeagueWallpaper
-Changes Desktop wallpapers to league splashes. 
+Changes Desktop wallpapers to league splashes. Executables are in the deploy folder. If you want them to run all the time place in the startup folder.
 
 #Current features: 
 
