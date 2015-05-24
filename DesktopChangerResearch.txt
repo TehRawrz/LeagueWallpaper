@@ -23,3 +23,5 @@ https://na.api.pvp.net/api/lol/na/v1.2/champion?freeToPlay=true&api_key=bf7ec21b
 //themed skins may use the same splash art so wallpaper won't change that cycle
 	--possibly check if image is the same if it is then skip it.
 //test changer code in windows 8
+//run as a service. YAJSW or NSSM
+	--NSSM is public domain and can be included
