@@ -24,7 +24,6 @@ public class Newskins {
 	String part3 = parted[0];
 	String url = "https://global.api.pvp.net/api/lol/static-data/na/v1.2/champion?champData=skins&api_key=bf7ec21b-9468-4e70-9019-e836fc5af85d";
     String json = IOUtils.toString(new URL(url));
-    System.out.print(json);
     JsonParser jsonParser = new JsonParser();
     JsonElement results = jsonParser.parse(json)
             .getAsJsonObject().get("data") 

@@ -50,8 +50,6 @@ public class FreeChamps {
 		          path, 
 		          new UINT_PTR(SPI.SPIF_UPDATEINIFILE | SPI.SPIF_SENDWININICHANGE));
 		TimeUnit.SECONDS.sleep(5);
-		    System.out.print(champ);
-		    System.out.println();
 			}
 		} catch (IOException f) {
 	        f.printStackTrace();
