@@ -6,8 +6,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.io.IOUtils;
+
 import source.WallpaperChanger.SPI;
+
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.sun.jna.platform.win32.WinDef.UINT_PTR;
@@ -17,7 +21,13 @@ public class FreeChamps {
 		try{
 			String url= "https://na.api.pvp.net/api/lol/na/v1.2/champion?freeToPlay=true&api_key=bf7ec21b-9468-4e70-9019-e836fc5af85d";
 			String json = IOUtils.toString(new URL(url));
-			for(int x=0; x <= 9; x = x+1){
+			JsonParser parse = new JsonParser();
+			JsonElement skins = parse.parse(json)
+					.getAsJsonObject().getAsJsonArray("champions");
+			JsonArray test = skins.getAsJsonArray();
+		    int size = test.size();
+		    int realsize = size - 1 ;
+			for(int x=0; x <= realsize; x = x+1){
 		    JsonParser jsonParser = new JsonParser();
 		    JsonElement results = jsonParser.parse(json)
 		    		 .getAsJsonObject().getAsJsonArray("champions").get(x)
