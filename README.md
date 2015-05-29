@@ -17,5 +17,7 @@ Gui/taskbar menu
 
 Adjustable delay time
 
-Icons and distribution form are not final. May be distributed as an exe or just installed as a service in the future.
+Possible Linux/Mac Support
+
+Install As Service
 
