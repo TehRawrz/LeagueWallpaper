@@ -2,9 +2,16 @@ package source;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
+
 import javax.swing.*;
- 
+
+import com.google.gson.*;
+
 public class FreeChampions {
     public static void main(String[] args) {
         
@@ -38,7 +45,7 @@ public class FreeChampions {
             ex.printStackTrace();
         } catch (ClassNotFoundException ex) {
             ex.printStackTrace();
-        }
+        } 
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -110,6 +117,12 @@ public class FreeChampions {
                     System.out.println("Selected: " + aButton.getText());
                   }
                 };
+                ActionListener testActionListener = new ActionListener() {
+                    public void actionPerformed(ActionEvent actionEvent) {
+                      //AbstractButton bButton = (AbstractButton) actionEvent.getSource();
+                      System.out.println("test");
+                    }
+                  };
 
                 panel.add(aRadioButton);
                 group.add(aRadioButton);
@@ -119,7 +132,7 @@ public class FreeChampions {
                 group.add(cRadioButton);
 
                 aRadioButton.addActionListener(sliceActionListener);
-                bRadioButton.addActionListener(sliceActionListener);
+                bRadioButton.addActionListener(testActionListener);
                 cRadioButton.addActionListener(sliceActionListener);
 
                 JButton ok;
@@ -157,37 +170,37 @@ public class FreeChampions {
         });
         delayItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-            	JFrame frame = new JFrame("Change Wallpaper Delay");
+            	final JFrame frame = new JFrame("Change Wallpaper Delay");
             	 
-                // Spinner with number
+                // Spinners for delay selection
                 SpinnerNumberModel snm = new SpinnerNumberModel(
                         new Integer(0),
                         new Integer(0),
-                        new Integer(100),
-                        new Integer(5)
+                        new Integer(31),
+                        new Integer(1)
                 );
-                JSpinner spnNumber = new JSpinner(snm);
+                final JSpinner spnNumber = new JSpinner(snm);
          
-                // Spinner with Dates
-                SpinnerNumberModel snm2 = new SpinnerNumberModel(
+                
+                 SpinnerNumberModel snm2 = new SpinnerNumberModel(
                         new Integer(0),
                         new Integer(0),
-                        new Integer(100),
-                        new Integer(5)
+                        new Integer(23),
+                        new Integer(1)
                 );
-                JSpinner spnNumber2 = new JSpinner(snm2);
+                final JSpinner spnNumber2 = new JSpinner(snm2);
                 
                 SpinnerNumberModel snm3 = new SpinnerNumberModel(
                         new Integer(0),
                         new Integer(0),
-                        new Integer(100),
-                        new Integer(5)
+                        new Integer(59),
+                        new Integer(1)
                 );
-                JSpinner spnNumber3 = new JSpinner(snm3);
-         
+                final JSpinner spnNumber3 = new JSpinner(snm3);
+                //Setup spinners/window
                 frame.setSize(300, 85);
                 frame.setResizable(false);
-         
+                
                 Container cont = frame.getContentPane();
          
                 cont.setLayout(new FlowLayout());
@@ -199,37 +212,117 @@ public class FreeChampions {
          
                 cont.add(new JLabel("Minutes:"));
                 cont.add(spnNumber3);
-                
+            	
                 JButton ok;
                 ok = new JButton("OK");
                 ok.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-                        JOptionPane.showMessageDialog(null,
-                                "OK");
+                    	try{
+                    		final Integer DayValue = (Integer)spnNumber.getValue();
+                    		final Integer HourValue = (Integer)spnNumber2.getValue();
+                    		final Integer MinuteValue = (Integer)spnNumber3.getValue();
+                    		JsonObject jobj = new JsonObject();
+                    		jobj.addProperty("days", DayValue);
+                    		jobj.addProperty("hours", HourValue);
+                    		jobj.addProperty("minutes", MinuteValue);
+                    		JsonArray ja = new JsonArray();
+                    		ja.add(jobj);
+                    		JsonObject mainObj = new JsonObject();
+                    		mainObj.add("time", ja);
+                    		FileWriter file = new FileWriter("delay.json");
+                    			file.write(mainObj.toString());
+                    			file.flush();
+                    			file.close();
+                    		frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+                    	}
+                    	catch (IOException f) {
+                	        f.printStackTrace();
                     }
+                    	}
                 });  
                 JButton cancel;
                 cancel = new JButton("Cancel");
                 cancel.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-                        JOptionPane.showMessageDialog(null,
-                                "cancelled");
+                    	File f = new File("delay.json");
+                        if(f.exists() && !f.isDirectory()) {
+                    	try{
+                    	JsonParser parser = new JsonParser();
+                    	JsonElement Obj = parser.parse(new FileReader("delay.json"));
+                    	int days = 
+                    			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
+            		    		 .getAsJsonObject().get("days").getAsInt() ;
+                    	int hours =
+                    			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
+                    			.getAsJsonObject().get("hours").getAsInt();
+                    	int minutes =
+                    			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
+                    			.getAsJsonObject().get("minutes").getAsInt();
+                    	spnNumber.setValue(days);
+                    	spnNumber2.setValue(hours);
+                    	spnNumber3.setValue(minutes);
+                    	}
+                    	catch (IOException ex) {
+                    		                System.err.println("An IOException was caught!");
+                    		                ex.printStackTrace();
+                    	}
+                    	} 
                     }
                 });  
                 JButton apply;
                 apply = new JButton("Apply");
                 apply.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-                        JOptionPane.showMessageDialog(null,
-                                "Applied");
+                    	try{ 
+                        	final Integer DayValue = (Integer)spnNumber.getValue();
+                        	final Integer HourValue = (Integer)spnNumber2.getValue();
+                        	final Integer MinuteValue = (Integer)spnNumber3.getValue();
+                        	JsonObject jobj = new JsonObject();
+                            jobj.addProperty("days", DayValue);
+                            jobj.addProperty("hours", HourValue);
+                            jobj.addProperty("minutes", MinuteValue);
+                            JsonArray ja = new JsonArray();
+                            ja.add(jobj);
+                            JsonObject mainObj = new JsonObject();
+                            mainObj.add("time", ja);
+                            FileWriter file = new FileWriter("delay.json");
+                            	file.write(mainObj.toString());
+                            	file.flush();
+                            	file.close();
+                        	}
+                        catch (IOException f) {
+                        	f.printStackTrace();
+                        	}
                     }
                 }); 
+                File f = new File("delay.json");
+                if(f.exists() && !f.isDirectory()) {
+                try{
+                JsonParser parser = new JsonParser();
+            	JsonElement Obj = parser.parse(new FileReader("delay.json"));
+                int days = 
+            			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
+    		    		 .getAsJsonObject().get("days").getAsInt() ;
+            	int hours =
+            			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
+            			.getAsJsonObject().get("hours").getAsInt();
+            	int minutes =
+            			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
+            			.getAsJsonObject().get("minutes").getAsInt();
+            	spnNumber.setValue(days);
+            	spnNumber2.setValue(hours);
+            	spnNumber3.setValue(minutes);
+            }catch (IOException ex) {
+                System.err.println("An IOException was caught!");
+                ex.printStackTrace();
+            }
+                }
+                
                 cont.add(ok);
                 cont.add(cancel);
                 cont.add(apply);
                 frame.setVisible(true);
-            }
-            	
+            }     	
         });
          
         exitItem.addActionListener(new ActionListener() {

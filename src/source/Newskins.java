@@ -1,14 +1,21 @@
 package source;
 
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import org.apache.commons.io.IOUtils;
+
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
+
 import org.jsoup.Jsoup;
+
 import source.WallpaperChanger.SPI;
+
 import com.google.gson.*;
 import com.sun.jna.platform.win32.WinDef.UINT_PTR;
 
@@ -48,7 +55,27 @@ public class Newskins {
 	          new UINT_PTR(0), 
 	          path, 
 	          new UINT_PTR(SPI.SPIF_UPDATEINIFILE | SPI.SPIF_SENDWININICHANGE));
-	TimeUnit.SECONDS.sleep(5);
+	      File f = new File("delay.json");
+          if(f.exists() && !f.isDirectory()) {
+	      JsonParser parser = new JsonParser();
+      	JsonElement Obj = parser.parse(new FileReader("delay.json"));
+      	int days = 
+      			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
+		    		 .getAsJsonObject().get("days").getAsInt() ;
+      	int hours =
+      			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
+      			.getAsJsonObject().get("hours").getAsInt();
+      	int minutes =
+      			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
+      			.getAsJsonObject().get("minutes").getAsInt();
+      	TimeUnit.DAYS.sleep(days);
+      	TimeUnit.HOURS.sleep(hours);
+      	TimeUnit.MINUTES.sleep(minutes);
+      	}
+          else{
+        	  TimeUnit.HOURS.sleep(4);
+          }
+	
 	}
 	} catch (IOException f) {
         f.printStackTrace(); 

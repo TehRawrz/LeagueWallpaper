@@ -3,14 +3,18 @@ package source;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.text.*;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.sun.jna.platform.win32.WinDef.UINT_PTR;
+
 import java.io.*;
 import java.net.URL;
+
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
+
 import source.WallpaperChanger.SPI;
 
 
@@ -29,12 +33,10 @@ public class WebData {
             JsonArray skins = results.getAsJsonArray();
         int size = skins.size();
         final long now = System.currentTimeMillis();
-            // get the tables on this page, note I masked the phone number
             String html = Jsoup.connect("http://leagueoflegends.wikia.com/wiki/List_of_champions").get().html();
             //grab date and name. tr is position in table by alphabet order
             for(int x = 1; x <= size; x = x+1) {
                 String date = Jsoup.parse(html,"ISO-8859-1").select("table").select("tbody").get(1).select("tr").get(x).select("td").get(7).text();
-                //String name = Jsoup.parse(html,"ISO-8859-1").select("table").select("tbody").get(1).select("tr").get(x).select("td").get(0).select("a").get(1).text();
                 //Format string data into dates
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                 Date newdate = formatter.parse(date);
@@ -74,7 +76,26 @@ public class WebData {
 	          new UINT_PTR(0), 
 	          path, 
 	          new UINT_PTR(SPI.SPIF_UPDATEINIFILE | SPI.SPIF_SENDWININICHANGE));
-	      TimeUnit.SECONDS.sleep(5);
+	      File f = new File("delay.json");
+          if(f.exists() && !f.isDirectory()) {
+	      JsonParser parser = new JsonParser();
+      	JsonElement Obj = parser.parse(new FileReader("delay.json"));
+      	int days = 
+      			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
+		    		 .getAsJsonObject().get("days").getAsInt() ;
+      	int hours =
+      			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
+      			.getAsJsonObject().get("hours").getAsInt();
+      	int minutes =
+      			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
+      			.getAsJsonObject().get("minutes").getAsInt();
+      	TimeUnit.DAYS.sleep(days);
+      	TimeUnit.HOURS.sleep(hours);
+      	TimeUnit.MINUTES.sleep(minutes);
+      	}
+          else{
+        	  TimeUnit.HOURS.sleep(4);
+          }
         }
         } catch(InterruptedException ex) {
      	   Thread.currentThread().interrupt();
