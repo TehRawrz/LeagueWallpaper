@@ -7,14 +7,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
-
 import javax.swing.*;
-
 import com.google.gson.*;
 
 public class FreeChampions {
     public static void main(String[] args) {
-        
         try {
         	final TrayIcon trayIcon =
                     new TrayIcon(createImage("CStiny.jpg", "tray icon"));
@@ -102,70 +99,178 @@ public class FreeChampions {
         });
         modeItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-            	JFrame frame = new JFrame("Modes");
+            	final JFrame frame2 = new JFrame("Modes");
 
                 JPanel panel = new JPanel(new GridLayout(0, 1));
           
                 ButtonGroup group = new ButtonGroup();
-                JRadioButton aRadioButton = new JRadioButton("Newest Champion");
-                JRadioButton bRadioButton = new JRadioButton("Newest Skins");
-                JRadioButton cRadioButton = new JRadioButton("Free Champion Rotation");
+                final JRadioButton newchamp = new JRadioButton("Newest Champion");
+                final JRadioButton newskin = new JRadioButton("Newest Skins");
+                final JRadioButton freechamp = new JRadioButton("Free Champion Rotation");
 
                 ActionListener sliceActionListener = new ActionListener() {
                   public void actionPerformed(ActionEvent actionEvent) {
-                    AbstractButton aButton = (AbstractButton) actionEvent.getSource();
-                    System.out.println("Selected: " + aButton.getText());
+                   // AbstractButton aButton = (AbstractButton) actionEvent.getSource();
+                    //System.out.println("Selected: " + aButton.getText());
                   }
                 };
                 ActionListener testActionListener = new ActionListener() {
                     public void actionPerformed(ActionEvent actionEvent) {
                       //AbstractButton bButton = (AbstractButton) actionEvent.getSource();
-                      System.out.println("test");
+                      //System.out.println("test");
                     }
                   };
+                panel.add(newchamp);
+                group.add(newchamp);
+                panel.add(newskin);
+                group.add(newskin);
+                panel.add(freechamp);
+                group.add(freechamp);
 
-                panel.add(aRadioButton);
-                group.add(aRadioButton);
-                panel.add(bRadioButton);
-                group.add(bRadioButton);
-                panel.add(cRadioButton);
-                group.add(cRadioButton);
-
-                aRadioButton.addActionListener(sliceActionListener);
-                bRadioButton.addActionListener(testActionListener);
-                cRadioButton.addActionListener(sliceActionListener);
+                newchamp.addActionListener(sliceActionListener);
+                newskin.addActionListener(testActionListener);
+                freechamp.addActionListener(sliceActionListener);
 
                 JButton ok;
                 ok = new JButton("OK");
                 ok.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-                        JOptionPane.showMessageDialog(null,
-                                "OK");
+                    	if(newchamp.isSelected()){
+                    		try{
+                    		JsonObject jobj = new JsonObject();
+                            jobj.addProperty("mode", "newchamp");
+                    		FileWriter file = new FileWriter("mode.json");
+                			file.write(jobj.toString());
+                			file.flush();
+                			file.close();
+                			}catch (IOException f) {
+                    	        f.printStackTrace();
+                        }
+                    	}
+                    	else if(newskin.isSelected()){
+                    		try{
+                        		JsonObject jobj = new JsonObject();
+                                jobj.addProperty("mode", "newskin");
+                        		FileWriter file = new FileWriter("mode.json");
+                    			file.write(jobj.toString());
+                    			file.flush();
+                    			file.close();
+                    			}catch (IOException f) {
+                        	        f.printStackTrace();}
+                    	}
+                    	else if(freechamp.isSelected()){
+                    		try{
+                        		JsonObject jobj = new JsonObject();
+                                jobj.addProperty("mode", "freechamp");
+                        		FileWriter file = new FileWriter("mode.json");
+                    			file.write(jobj.toString());
+                    			file.flush();
+                    			file.close();
+                    			}catch (IOException f) {
+                        	        f.printStackTrace();}
+                    	}
+                    	frame2.dispatchEvent(new WindowEvent(frame2, WindowEvent.WINDOW_CLOSING));
                     }
                 });  
                 JButton cancel;
                 cancel = new JButton("Cancel");
                 cancel.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-                        JOptionPane.showMessageDialog(null,
-                                "cancelled");
+                    	File f = new File("mode.json");
+                        if(f.exists() && !f.isDirectory()) {
+                        	try{
+                        JsonParser parser = new JsonParser();
+                    	JsonElement Obj = parser.parse(new FileReader("mode.json"));
+                    	 String mode = 
+                    			Obj.getAsJsonObject().
+            		    		 getAsJsonObject().get("mode").getAsString();
+                    		if(mode.equals("newskin")){
+                    		newskin.setSelected(true);
+                    		}
+                    		if(mode.equals("newchamp")){
+                        		newchamp.setSelected(true);
+                        		}
+                    		if(mode.equals("freechamp")){
+                    			freechamp.setSelected(true);
+                    		}
+                    	}
+                    	catch (IOException g) {
+                	        g.printStackTrace();
+                    	}
                     }
+                }
                 });  
                 JButton apply;
                 apply = new JButton("Apply");
                 apply.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-                        JOptionPane.showMessageDialog(null,
-                                "Applied");
+                    	if(newchamp.isSelected()){
+                    		try{
+                    		JsonObject jobj = new JsonObject();
+                            jobj.addProperty("mode", "newchamp");
+                    		FileWriter file = new FileWriter("mode.json");
+                			file.write(jobj.toString());
+                			file.flush();
+                			file.close();
+                			frame2.dispatchEvent(new WindowEvent(frame2, WindowEvent.WINDOW_CLOSING));
+                			}catch (IOException f) {
+                    	        f.printStackTrace();
+                        }
+                    	}
+                    	else if(newskin.isSelected()){
+                    		try{
+                        		JsonObject jobj = new JsonObject();
+                                jobj.addProperty("mode", "newskin");
+                        		FileWriter file = new FileWriter("mode.json");
+                    			file.write(jobj.toString());
+                    			file.flush();
+                    			file.close();
+                    			}catch (IOException f) {
+                        	        f.printStackTrace();}
+                    	}
+                    	else if(freechamp.isSelected()){
+                    		try{
+                        		JsonObject jobj = new JsonObject();
+                                jobj.addProperty("mode", "freechamp");
+                        		FileWriter file = new FileWriter("mode.json");
+                    			file.write(jobj.toString());
+                    			file.flush();
+                    			file.close();
+                    			}catch (IOException f) {
+                        	        f.printStackTrace();}
+                    	}
                     }
                 }); 
-                frame.add(panel);
-                frame.setSize(200, 200);
-                frame.setResizable(false);
-                frame.setVisible(true);
+                
+                frame2.add(panel);
+                frame2.setSize(200, 200);
+                frame2.setResizable(false);
+                frame2.setVisible(true);
                 panel.add(ok);
                 panel.add(cancel);
                 panel.add(apply);
+                File f = new File("mode.json");
+                if(f.exists() && !f.isDirectory()) {
+                	try{
+                JsonParser parser = new JsonParser();
+            	JsonElement Obj = parser.parse(new FileReader("mode.json"));
+            	 String mode = 
+            			Obj.getAsJsonObject().
+    		    		 getAsJsonObject().get("mode").getAsString();
+            		if(mode.equals("newskin")){
+            		newskin.setSelected(true);
+            		}
+            		if(mode.equals("newchamp")){
+                		newchamp.setSelected(true);
+                		}
+            		if(mode.equals("freechamp")){
+            			freechamp.setSelected(true);
+            		}
+            	}
+            	catch (IOException g) {
+        	        g.printStackTrace();
+            }
+                }
             }
         });
         delayItem.addActionListener(new ActionListener() {
