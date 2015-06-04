@@ -22,7 +22,6 @@ public class WebData {
 
 	public static void main(String[] args) {
 		try {
-
         List<Date> dater = new ArrayList<>();
         while(true){
         String array = "https://na.api.pvp.net/api/lol/na/v1.2/champion?api_key=bf7ec21b-9468-4e70-9019-e836fc5af85d";

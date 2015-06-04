@@ -29,17 +29,26 @@ public class Newskins {
 	String part2 = parts[1]; 
 	String[] parted = part2.split("/");
 	String part3 = parted[0];
+	String[] temp;
+    String delimiter ="_";
+    temp = part3.split(delimiter);
+    String output ="";
+    for(String str: temp)
+        output=output+str;
+	System.out.println(output);
 	String url = "https://global.api.pvp.net/api/lol/static-data/na/v1.2/champion?champData=skins&api_key=bf7ec21b-9468-4e70-9019-e836fc5af85d";
     String json = IOUtils.toString(new URL(url));
     JsonParser jsonParser = new JsonParser();
     JsonElement results = jsonParser.parse(json)
             .getAsJsonObject().get("data") 
-            .getAsJsonObject().get(part3)
+            .getAsJsonObject().get(output)
     		.getAsJsonObject().get("skins");
     JsonArray skins = results.getAsJsonArray();
     int size = skins.size();
     int realsize = size - 1;
-    URL url2 = new URL("http://ddragon.leagueoflegends.com/cdn/img/champion/splash/" + part3 +"_" + realsize + ".jpg");
+    JsonElement getpart = skins.get(realsize);
+    int finalnum = getpart.getAsJsonObject().get("num").getAsInt();
+    URL url2 = new URL("http://ddragon.leagueoflegends.com/cdn/img/champion/splash/" + output +"_" + finalnum + ".jpg");
 		InputStream is = url2.openStream();
 		OutputStream os = new FileOutputStream("image.jpg");
 		byte[] b = new byte[2048];

@@ -212,7 +212,6 @@ public class FreeChampions {
                 			file.write(jobj.toString());
                 			file.flush();
                 			file.close();
-                			frame2.dispatchEvent(new WindowEvent(frame2, WindowEvent.WINDOW_CLOSING));
                 			}catch (IOException f) {
                     	        f.printStackTrace();
                         }
