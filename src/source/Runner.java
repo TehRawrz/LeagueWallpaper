@@ -2,6 +2,7 @@ package source;
 
 import java.awt.AWTException;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
@@ -75,17 +76,111 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 public class Runner {
 public static void main(String[] args) throws InterruptedException {
     ExecutorService service = Executors.newFixedThreadPool(2);
-    //ExecutorService freechamp = Executors.newFixedThreadPool(1);
     service.submit(new ModeScanner());
     service.submit(new Tray());
 }  
-}  
+}
+ class First implements Callable<Object> {
+	 public Object call() throws Exception {
+		 JsonObject jobj = new JsonObject();
+         jobj.addProperty("firstrun", "true");
+ 		FileWriter file = new FileWriter("json/first.json");
+			file.write(jobj.toString());
+			file.flush();
+			file.close();
+		System.out.println("First Run"); 
+		return null;
+	 }
+ }
+ class Delay implements Callable<Object>{
+	 public Object call() throws Exception{
+		 try{
+		 File g = new File("json/first.json");
+			if(g.exists() && !g.isDirectory()) {
+		      JsonParser parser = new JsonParser();
+	      	  JsonElement Ob = parser.parse(new FileReader("json/first.json"));
+	      	  Boolean first = 
+	      			  Ob.getAsJsonObject().get("firstrun").getAsBoolean();
+	      	  if(first == true){
+	   		 JsonObject jobja = new JsonObject();
+	            jobja.addProperty("firstrun", "false");
+	    		FileWriter files = new FileWriter("json/first.json");
+	   			files.write(jobja.toString());
+	   			files.flush();
+	   			files.close();
+	   			System.out.println("Overwriting Json");
+	      	  }
+	      	  else{
+	      		System.out.println("Delaying");
+				File f = new File("json/delay.json");
+		          if(f.exists() && !f.isDirectory()) {
+			      JsonParser parser2 = new JsonParser();
+		      	JsonElement Obj = parser2.parse(new FileReader("json/delay.json"));
+		      	int days = 
+		      			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
+				    		 .getAsJsonObject().get("days").getAsInt() ;
+		      	int hours =
+		      			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
+		      			.getAsJsonObject().get("hours").getAsInt();
+		      	int minutes =
+		      			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
+		      			.getAsJsonObject().get("minutes").getAsInt();
+		      	TimeUnit.DAYS.sleep(days);
+		      	TimeUnit.HOURS.sleep(hours);
+		      	TimeUnit.MINUTES.sleep(minutes);
+		      	}
+		          else{
+		        	  System.out.println("Default Delay");
+		        	  TimeUnit.SECONDS.sleep(4);
+		          } 
+	      	  }
+			}
+			else{
+				System.out.println("Delaying Without First JSON Available");
+				File f = new File("json/delay.json");
+		          if(f.exists() && !f.isDirectory()) {
+			      JsonParser parser2 = new JsonParser();
+		      	JsonElement Obj = parser2.parse(new FileReader("json/delay.json"));
+		      	int days = 
+		      			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
+				    		 .getAsJsonObject().get("days").getAsInt() ;
+		      	int hours =
+		      			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
+		      			.getAsJsonObject().get("hours").getAsInt();
+		      	int minutes =
+		      			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
+		      			.getAsJsonObject().get("minutes").getAsInt();
+		      	TimeUnit.DAYS.sleep(days);
+		      	TimeUnit.HOURS.sleep(hours);
+		      	TimeUnit.MINUTES.sleep(minutes);
+		      	}
+		          else{
+		        	  TimeUnit.SECONDS.sleep(4);
+		          } 
+			}
+			
+		 }
+			catch(InterruptedException ex) {
+		     	   Thread.currentThread().interrupt();
+		        }
+		 return null;
+	 }
+ }
  class Newchamp implements Callable<Object> {
 	 public Object call() throws Exception {
 		 System.out.println("New Champion Cycle");
 		 try {
+			 final long now = System.currentTimeMillis();
+			 ExecutorService firstrun = Executors.newFixedThreadPool(1);
+			 firstrun.submit(new First());
+			 firstrun.shutdown();
+			 firstrun.awaitTermination(1, TimeUnit.HOURS);
 		        List<Date> dater = new ArrayList<>();
 		        while(true){
+		        	ExecutorService delay = Executors.newFixedThreadPool(1);
+					 delay.submit(new Delay());
+					 delay.shutdown();
+					 delay.awaitTermination(1, TimeUnit.HOURS);
 		        String array = "https://na.api.pvp.net/api/lol/na/v1.2/champion?api_key=bf7ec21b-9468-4e70-9019-e836fc5af85d";
 		        String json = IOUtils.toString(new URL(array));
 		            JsonParser jsonParser = new JsonParser();
@@ -93,7 +188,7 @@ public static void main(String[] args) throws InterruptedException {
 		            		.getAsJsonObject().get("champions");
 		            JsonArray skins = results.getAsJsonArray();
 		        int size = skins.size();
-		        final long now = System.currentTimeMillis();
+		        
 		            String html = Jsoup.connect("http://leagueoflegends.wikia.com/wiki/List_of_champions").get().html();
 		            //grab date and name. tr is position in table by alphabet order
 		            for(int x = 1; x <= size; x = x+1) {
@@ -131,35 +226,14 @@ public static void main(String[] args) throws InterruptedException {
 		   		}
 		   		is.close();
 		   		os.close();
+				System.out.println("Changing Wallpaper");
 		   		String path = "image.jpg";
 			      SPI.INSTANCE.SystemParametersInfo(
 			          new UINT_PTR(SPI.SPI_SETDESKWALLPAPER), 
 			          new UINT_PTR(0), 
 			          path, 
 			          new UINT_PTR(SPI.SPIF_UPDATEINIFILE | SPI.SPIF_SENDWININICHANGE));
-			      File f = new File("json/delay.json");
-		          if(f.exists() && !f.isDirectory()) {
-			      JsonParser parser = new JsonParser();
-		      	JsonElement Obj = parser.parse(new FileReader("json/delay.json"));
-		      	int days = 
-		      			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
-				    		 .getAsJsonObject().get("days").getAsInt() ;
-		      	int hours =
-		      			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
-		      			.getAsJsonObject().get("hours").getAsInt();
-		      	int minutes =
-		      			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
-		      			.getAsJsonObject().get("minutes").getAsInt();
-		      	TimeUnit.DAYS.sleep(days);
-		      	TimeUnit.HOURS.sleep(hours);
-		      	TimeUnit.MINUTES.sleep(minutes);
-		      	}
-		          else{
-		        	  TimeUnit.HOURS.sleep(4);
-		          }
 		        }
-		        } catch(InterruptedException ex) {
-		     	   Thread.currentThread().interrupt();
 		        } catch (IOException e) {
 		            e.printStackTrace();
 		        } 
@@ -173,12 +247,19 @@ public static void main(String[] args) throws InterruptedException {
  class Newskin implements Callable<Object> {
 	 public Object call() throws Exception {
 		 System.out.println("New Skin Cycle");
+		 ExecutorService firstrun = Executors.newFixedThreadPool(1);
+		 firstrun.submit(new First());
+		 firstrun.shutdown();
+		 firstrun.awaitTermination(1, TimeUnit.HOURS);
 		 while(true){
-		 try {	
-				String html = Jsoup.connect("http://leagueoflegends.wikia.com/wiki/League_of_Legends_Wiki/New_skins").get().html();
+		 try {
 				for(int x = 2; x <= 14; x = x+2) {
-					System.out.println(x);
-					String parse = Jsoup.parse(html,"ISO-8859-1").select("body").get(0).select("div").get(40).select("div").get(5).select("div").get(6).select("div").get(3).select("div").get(x).html();	
+					ExecutorService delay = Executors.newFixedThreadPool(1);
+					 delay.submit(new Delay());
+					 delay.shutdown();
+					 delay.awaitTermination(1, TimeUnit.HOURS);
+					 String html = Jsoup.connect("http://leagueoflegends.wikia.com/wiki/League_of_Legends_Wiki/New_skins").get().html();
+				String parse = Jsoup.parse(html,"ISO-8859-1").select("body").get(0).select("div").get(40).select("div").get(5).select("div").get(6).select("div").get(3).select("div").get(x).html();	
 				String[] parts = parse.split("/wiki/");
 				String part2 = parts[1]; 
 				String[] parted = part2.split("/");
@@ -212,33 +293,13 @@ public static void main(String[] args) throws InterruptedException {
 					}
 					is.close();
 					os.close();
+			          System.out.println("Changing Wallpaper");
 					String path = "image.jpg";
 				      SPI.INSTANCE.SystemParametersInfo(
 				          new UINT_PTR(SPI.SPI_SETDESKWALLPAPER), 
 				          new UINT_PTR(0), 
 				          path, 
 				          new UINT_PTR(SPI.SPIF_UPDATEINIFILE | SPI.SPIF_SENDWININICHANGE));
-				      File f = new File("json/delay.json");
-			          if(f.exists() && !f.isDirectory()) {
-				      JsonParser parser = new JsonParser();
-			      	JsonElement Obj = parser.parse(new FileReader("json/delay.json"));
-			      	int days = 
-			      			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
-					    		 .getAsJsonObject().get("days").getAsInt() ;
-			      	int hours =
-			      			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
-			      			.getAsJsonObject().get("hours").getAsInt();
-			      	int minutes =
-			      			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
-			      			.getAsJsonObject().get("minutes").getAsInt();
-			      	TimeUnit.DAYS.sleep(days);
-			      	TimeUnit.HOURS.sleep(hours);
-			      	TimeUnit.MINUTES.sleep(minutes);
-			      	}
-			          else{
-			        	  TimeUnit.SECONDS.sleep(4);
-			          }
-				
 				}
 				} catch (IOException f) {
 			        f.printStackTrace(); 
@@ -251,9 +312,17 @@ public static void main(String[] args) throws InterruptedException {
  }
  class Freechamp implements Callable<Object> {
 	 public Object call() throws Exception {
+		 System.out.println("Free Champion Cycle");
+		 ExecutorService firstrun = Executors.newFixedThreadPool(1);
+		 firstrun.submit(new First());
+		 firstrun.shutdown();
+		 firstrun.awaitTermination(1, TimeUnit.HOURS);
 		 while(true){
 		 try{
-			 System.out.println("Free Champion Cycle");
+			 ExecutorService delay = Executors.newFixedThreadPool(1);
+			 delay.submit(new Delay());
+			 delay.shutdown();
+			 delay.awaitTermination(1, TimeUnit.HOURS);
 				//parse freetoplay json
 				String url= "https://na.api.pvp.net/api/lol/na/v1.2/champion?freeToPlay=true&api_key=bf7ec21b-9468-4e70-9019-e836fc5af85d";
 				String json = IOUtils.toString(new URL(url));
@@ -293,33 +362,13 @@ public static void main(String[] args) throws InterruptedException {
 				}
 				is.close();
 				os.close();
+				System.out.println("Changing Wallpaper");
 				String path = "image.jpg";
 			      SPI.INSTANCE.SystemParametersInfo(
 			          new UINT_PTR(SPI.SPI_SETDESKWALLPAPER), 
 			          new UINT_PTR(0), 
 			          path, 
 			          new UINT_PTR(SPI.SPIF_UPDATEINIFILE | SPI.SPIF_SENDWININICHANGE));
-			     //Set delay 
-			      File f = new File("json/delay.json");
-		          if(f.exists() && !f.isDirectory()) {
-			      JsonParser parser = new JsonParser();
-		      	JsonElement Obj = parser.parse(new FileReader("json/delay.json"));
-		      	int days = 
-		      			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
-				    		 .getAsJsonObject().get("days").getAsInt() ;
-		      	int hours =
-		      			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
-		      			.getAsJsonObject().get("hours").getAsInt();
-		      	int minutes =
-		      			Obj.getAsJsonObject().getAsJsonArray("time").get(0)
-		      			.getAsJsonObject().get("minutes").getAsInt();
-		      	TimeUnit.DAYS.sleep(days);
-		      	TimeUnit.HOURS.sleep(hours);
-		      	TimeUnit.MINUTES.sleep(minutes);
-		      	}
-		          else{
-		        	  TimeUnit.SECONDS.sleep(10);
-		          }
 				}
 			} catch (IOException f) {
 		        f.printStackTrace();
@@ -368,7 +417,6 @@ public static void main(String[] args) throws InterruptedException {
              try {
                  key = watcher.take();
              } catch (InterruptedException ex) {
-                 //return;
              }
              //stop from sending two messages
              TimeUnit.SECONDS.sleep(1);
@@ -378,8 +426,6 @@ public static void main(String[] args) throws InterruptedException {
                  @SuppressWarnings("unchecked")
                  WatchEvent<Path> ev = (WatchEvent<Path>) event;
                  Path fileName = ev.context();
-                  
-               //  System.out.println(kind.name() + ": " + fileName);
                  if (kind == ENTRY_MODIFY &&  fileName.toString().equals("mode.json") || fileName.toString().equals("delay.json")) {
                 	 System.out.println("File Changed");
                 	 newchamp.shutdownNow();
@@ -388,44 +434,15 @@ public static void main(String[] args) throws InterruptedException {
                 	 ExecutorService starter = Executors.newFixedThreadPool(1);
                 	 starter.submit(new Starter());
                  }
-          
-                /* 
-                 if (kind == ENTRY_CREATE &&
-                 		fileName.toString().equals("delay.json")) {
-                 	System.out.println("Delay File Created");
-                 	
-             }
-             */
              }
              boolean valid = key.reset();
              if (!valid) {
                  break;
              }
-                  
-   //catch (IOException e) {
- //	 System.err.println(e);
- // System.out.println("Thread " +  threadName + " exiting.");
-
-        //return null;
     }
 		return null;
     }
  }
-    /*
-    protected void scan(File path, int deepth) {
-        if (deepth < 15) {
-            System.out.println("Scanning " + path + " at a deepth of " + deepth);
-
-            File[] files = path.listFiles();
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    scan(file, ++deepth);
-                }
-            }
-        }
-    }
-}
-*/
  class Starter implements Callable<Object> {
 	 ExecutorService newchamp = Executors.newFixedThreadPool(1);
 	 ExecutorService freechamp = Executors.newFixedThreadPool(1);
@@ -466,7 +483,7 @@ public static void main(String[] args) throws InterruptedException {
     @Override
     public Object call() throws Exception {
     	try {
-    		Image image = Toolkit.getDefaultToolkit().getImage("images/tray.gif");
+    		Image image = Toolkit.getDefaultToolkit().getImage("CStiny.jpg");
         	final TrayIcon trayIcon =
                     new TrayIcon(image, "League Wallpaper");
         	final JPopupMenu jpopup = new JPopupMenu();
@@ -555,9 +572,10 @@ public static void main(String[] args) throws InterruptedException {
         modeItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             	final JFrame frame2 = new JFrame("Modes");
-
+            	Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+            	frame2.setLocation(dim.width/2-frame2.getSize().width/2, dim.height/2-frame2.getSize().height/2);
                 JPanel panel = new JPanel(new GridLayout(0, 1));
-          
+                	
                 ButtonGroup group = new ButtonGroup();
                 final JRadioButton newchamp = new JRadioButton("Newest Champion");
                 final JRadioButton newskin = new JRadioButton("Newest Skins");
@@ -565,14 +583,10 @@ public static void main(String[] args) throws InterruptedException {
 
                 ActionListener sliceActionListener = new ActionListener() {
                   public void actionPerformed(ActionEvent actionEvent) {
-                   // AbstractButton aButton = (AbstractButton) actionEvent.getSource();
-                    //System.out.println("Selected: " + aButton.getText());
                   }
                 };
                 ActionListener testActionListener = new ActionListener() {
                     public void actionPerformed(ActionEvent actionEvent) {
-                      //AbstractButton bButton = (AbstractButton) actionEvent.getSource();
-                      //System.out.println("test");
                     }
                   };
                 panel.add(newchamp);
@@ -730,7 +744,8 @@ public static void main(String[] args) throws InterruptedException {
         delayItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             	final JFrame frame = new JFrame("Change Wallpaper Delay");
-            	 
+            	Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+            	frame.setLocation(dim.width/2-frame.getSize().width/2, dim.height/2-frame.getSize().height/2);
                 // Spinners for delay selection
                 SpinnerNumberModel snm = new SpinnerNumberModel(
                         new Integer(0),
@@ -894,7 +909,7 @@ public static void main(String[] args) throws InterruptedException {
      
     //Obtain the image URL
     protected static Image createImage(String path, String description) {
-        URL imageURL = FreeChampions.class.getResource(path);
+        URL imageURL = Runner.class.getResource(path);
          
         if (imageURL == null) {
             System.err.println("Resource not found: " + path);
@@ -904,6 +919,5 @@ public static void main(String[] args) throws InterruptedException {
         }
     }
 {
-        //return null;
     }
 }
